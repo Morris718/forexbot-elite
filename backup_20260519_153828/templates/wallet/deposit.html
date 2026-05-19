@@ -1,0 +1,19 @@
+﻿{% extends "base.html" %}
+{% block title %}Deposit - Forex Bot Pro{% endblock %}
+{% block content %}
+<div style="max-width:450px;margin:0 auto;">
+    <div class="card">
+        <h2 style="color:var(--text-primary);margin-bottom:1.5rem;text-align:center;">
+            <i class="fas fa-plus-circle" style="color:var(--accent-green);"></i> Deposit Funds
+        </h2>
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                <input type="number" name="amount" step="0.01" min="10" class="form-control" placeholder="100.00" required>
+            </div>
+            <button type="submit" class="btn btn-success" style="width:100%;">Deposit</button>
+        </form>
+        <a href="{{ url_for('wallet.index') }}" class="btn btn-outline" style="width:100%;margin-top:1rem;">Cancel</a>
+    </div>
+</div>
+{% endblock %}

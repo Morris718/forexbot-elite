@@ -1,0 +1,9 @@
+﻿{% extends "base.html" %}{% block title %}Settings{% endblock %}{% block page_title %}⚙️ Settings{% endblock %}
+{% block content %}<div style="max-width:700px"><form method="POST" action="{{ url_for('trading.save_settings') }}"><input type="hidden" name="csrf_token" value="">
+<div class="card mb-16"><div class="card-header mb-16"><div class="card-title">Risk Profile</div></div><div class="card-body"><div class="grid-3">
+{% for m,d,c in [("conservative","Low risk","var(--blue)"),("moderate","Balanced","var(--gold)"),("aggressive","High risk","var(--red)")] %}
+<label style="cursor:pointer"><input type="radio" name="risk_appetite" value="{{m}}" {{'checked' if current_user.risk_appetite==m}}>
+<div style="margin-top:7px;padding:12px;border-radius:5px;border:2px solid {{'var(--border)' if current_user.risk_appetite!=m else c}};background:rgba(255,255,255,0.02)">
+<div style="font-size:12px;font-weight:700;color:{{c}};text-transform:capitalize">{{m}}</div><div class="text-xs text-muted mt-8">{{d}}</div></div></label>{% endfor %}
+</div></div></div>
+<button type="submit" class="btn btn-gold btn-lg">💾 Save</button></form></div>{% endblock %}

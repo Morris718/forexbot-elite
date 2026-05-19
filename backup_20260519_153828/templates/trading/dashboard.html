@@ -1,0 +1,84 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard - Forex Bot Pro{% endblock %}
+{% block content %}
+<div style="margin-bottom:2rem;">
+    <h1 style="color:var(--text-primary);margin-bottom:0.5rem;">
+        <i class="fas fa-tachometer-alt" style="color:var(--accent-gold);"></i> Trading Dashboard
+    </h1>
+    <p style="color:var(--text-secondary);">Welcome back, {{ current_user.full_name }}!</p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;margin-bottom:2rem;">
+    <div class="card" style="text-align:center;">
+        <i class="fas fa-wallet" style="font-size:2.5rem;color:var(--accent-green);margin-bottom:1rem;"></i>
+        <div style="color:var(--text-secondary);margin-bottom:0.5rem;">Account Balance</div>
+        <div style="font-size:2rem;font-weight:700;color:var(--accent-green);">${{ "%.2f"|format(balance) }}</div>
+    </div>
+    <div class="card" style="text-align:center;">
+        <i class="fas fa-briefcase" style="font-size:2.5rem;color:var(--accent-blue);margin-bottom:1rem;"></i>
+        <div style="color:var(--text-secondary);margin-bottom:0.5rem;">Open Trades</div>
+        <div style="font-size:2rem;font-weight:700;color:var(--accent-blue);">{{ open_trades }}</div>
+    </div>
+    <div class="card" style="text-align:center;">
+        <i class="fas fa-check-circle" style="font-size:2.5rem;color:var(--accent-gold);margin-bottom:1rem;"></i>
+        <div style="color:var(--text-secondary);margin-bottom:0.5rem;">Closed Trades</div>
+        <div style="font-size:2rem;font-weight:700;color:var(--accent-gold);">{{ closed_trades }}</div>
+    </div>
+    <div class="card" style="text-align:center;">
+        <i class="fas fa-chart-line" style="font-size:2.5rem;color:{% if total_pnl >= 0 %}var(--accent-green){% else %}var(--accent-red){% endif %};margin-bottom:1rem;"></i>
+        <div style="color:var(--text-secondary);margin-bottom:0.5rem;">Total P&L</div>
+        <div style="font-size:2rem;font-weight:700;color:{% if total_pnl >= 0 %}var(--accent-green){% else %}var(--accent-red){% endif %};">
+            {% if total_pnl >= 0 %}+{% endif %}${{ "%.2f"|format(total_pnl) }}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="color:var(--text-primary);margin-bottom:1rem;">
+        <i class="fas fa-history"></i> Recent Trades
+    </h2>
+    {% if recent_trades %}
+    <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <th style="padding:1rem;text-align:left;color:var(--text-secondary);">Pair</th>
+                    <th style="padding:1rem;text-align:left;color:var(--text-secondary);">Type</th>
+                    <th style="padding:1rem;text-align:left;color:var(--text-secondary);">Entry</th>
+                    <th style="padding:1rem;text-align:left;color:var(--text-secondary);">P&L</th>
+                    <th style="padding:1rem;text-align:left;color:var(--text-secondary);">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trade in recent_trades %}
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:1rem;color:var(--text-primary);">{{ trade.pair }}</td>
+                    <td style="padding:1rem;">
+                        <span style="color:{% if trade.trade_type == 'BUY' %}var(--accent-green){% else %}var(--accent-red){% endif %};">
+                            {{ trade.trade_type }}
+                        </span>
+                    </td>
+                    <td style="padding:1rem;color:var(--text-primary);">${{ trade.entry_price }}</td>
+                    <td style="padding:1rem;color:{% if trade.profit_loss >= 0 %}var(--accent-green){% else %}var(--accent-red){% endif %};">
+                        {% if trade.profit_loss >= 0 %}+{% endif %}${{ "%.2f"|format(trade.profit_loss) }}
+                    </td>
+                    <td style="padding:1rem;">
+                        <span style="padding:0.25rem 0.75rem;border-radius:20px;font-size:0.85rem;
+                            {% if trade.status == 'OPEN' %}background:rgba(16,185,129,0.2);color:var(--accent-green);
+                            {% else %}background:rgba(156,163,175,0.2);color:var(--text-secondary);{% endif %}">
+                            {{ trade.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:var(--text-secondary);text-align:center;padding:2rem;">
+        <i class="fas fa-inbox" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>
+        No trades yet. Start trading!
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

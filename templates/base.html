@@ -1,0 +1,96 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}ForexBot Elite{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body data-user="{{ current_user.full_name if current_user.is_authenticated else 'Trader' }}" data-active-pair="{{ active_pair|default('EUR/USD') }}">
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">F</div>
+      <div><div class="brand-name">ForexBot</div><div class="brand-sub">Elite Pro</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <a class="nav-item" href="{{ url_for('dashboard.index') }}"><span class="nav-icon">📊</span>Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Trading</div>
+        <a class="nav-item" href="{{ url_for('trading.live_default') }}"><span class="nav-icon">⚡</span>Live Trading<span class="nav-badge">LIVE</span></a>
+        <a class="nav-item" href="{{ url_for('trading.positions_page') }}">
+          <span class="nav-icon">📂</span>Positions
+          {% set opc = current_user.positions.filter_by(status='open').count() if current_user.is_authenticated else 0 %}
+          {% if opc > 0 %}<span class="nav-count">{{ opc }}</span>{% endif %}
+        </a>
+        <a class="nav-item" href="{{ url_for('trading.signals') }}"><span class="nav-icon">🎯</span>AI Signals</a>
+        <a class="nav-item" href="{{ url_for('trading.markets') }}"><span class="nav-icon">📈</span>Markets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Analytics</div>
+        <a class="nav-item" href="{{ url_for('trading.analytics') }}"><span class="nav-icon">🔬</span>Performance</a>
+        <a class="nav-item" href="{{ url_for('trading.backtest') }}"><span class="nav-icon">🕐</span>Backtesting</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Account</div>
+        <a class="nav-item" href="{{ url_for('auth.wallet') }}"><span class="nav-icon">💳</span>Wallet</a>
+        <a class="nav-item" href="{{ url_for('auth.profile') }}"><span class="nav-icon">👤</span>Profile</a>
+        <a class="nav-item" href="{{ url_for('trading.settings') }}"><span class="nav-icon">⚙️</span>Settings</a>
+        <a class="nav-item" href="{{ url_for('support.chat') }}"><span class="nav-icon">💬</span>Live Support</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      {% if current_user.is_authenticated %}
+      <div class="mode-box">
+        <div>
+          <div style="font-size:12px;font-weight:700">{{ "Demo" if current_user.demo_mode else "Live" }}</div>
+          <div class="mode-pill {{ 'demo' if current_user.demo_mode else 'live' }}">${{ "%.2f"|format(current_user.active_balance) }}</div>
+        </div>
+        <form method="POST" action="{{ url_for('auth.toggle_mode') }}" style="margin:0">
+          <input type="hidden" name="csrf_token" value="">
+          <button type="submit" class="btn btn-sm">Switch</button>
+        </form>
+      </div>
+      <a class="nav-item" href="{{ url_for('auth.logout') }}"><span class="nav-icon">🚪</span>Logout</a>
+      {% endif %}
+    </div>
+  </aside>
+  <div class="main-area">
+    <header class="topbar">
+      <button id="menu-toggle" class="btn btn-sm" style="padding:5px 9px">☰</button>
+      <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+      <div class="topbar-actions">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('auth.wallet') }}" class="balance-chip" style="text-decoration:none">
+          <div class="bl">{{ "DEMO" if current_user.demo_mode else "LIVE" }}</div>
+          <div class="bv">${{ "%.2f"|format(current_user.active_balance) }}</div>
+        </a>
+        <a href="{{ url_for('trading.positions_page') }}" class="btn btn-sm" title="Open Positions">
+          📂 {% if opc is defined and opc > 0 %}{{ opc }}{% endif %}
+        </a>
+        <a href="{{ url_for('support.chat') }}" class="btn btn-sm">💬</a>
+        <a href="{{ url_for('auth.profile') }}" class="avatar">{{ current_user.get_initials() }}</a>
+        {% endif %}
+      </div>
+    </header>
+    <main class="page-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<div class="flash-wrap">
+          {% for cat,msg in messages %}<div class="flash {{cat}}">
+            {{ "✅" if cat=="success" else "⚠️" if cat=="warning" else "ℹ️" if cat=="info" else "❌" }} {{msg}}</div>{% endfor %}
+        </div>{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script src="{{ url_for('static',filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

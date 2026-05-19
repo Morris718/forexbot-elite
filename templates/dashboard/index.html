@@ -1,0 +1,47 @@
+﻿{% extends "base.html" %}{% block title %}Dashboard{% endblock %}{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="mb-20">
+  <div style="font-size:20px;font-weight:800">Good {{ "morning" if now.hour<12 else "afternoon" if now.hour<18 else "evening" }}, {{ current_user.full_name.split()[0] }} 👋</div>
+  <div class="text-sm text-muted mt-8">Live engine running · {{ now.strftime("%A, %d %b %Y %H:%M") }} UTC</div>
+</div>
+<div class="stat-grid mb-20">
+  <div class="stat-card sc-gold"><div class="stat-icon si-gold">💰</div><div class="stat-label">Balance</div><div class="stat-value">${{ "%.0f"|format(current_user.active_balance) }}</div></div>
+  <div class="stat-card sc-green"><div class="stat-icon si-green">📊</div><div class="stat-label">Win Rate</div><div class="stat-value">{{ perf.win_rate }}%</div></div>
+  <div class="stat-card sc-blue"><div class="stat-icon si-blue">📂</div><div class="stat-label">Open Positions</div><div class="stat-value">{{ open_pos_count }}</div></div>
+  <div class="stat-card sc-purple"><div class="stat-icon si-purple">🏆</div><div class="stat-label">Total Trades</div><div class="stat-value">{{ current_user.total_trades }}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+  <div>
+    <div class="section-title mb-12">⚡ Top Signals</div>
+    {% for sig in signals %}{% set dir=sig.direction|lower %}
+    <div class="card mb-12" style="border-left:3px solid {{ 'var(--green)' if dir=='buy' else 'var(--red)' }};padding:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:14px;font-weight:800">{{ sig.pair }}</span>
+        <span class="dir-chip {{dir}}">{{ '▲' if dir=='buy' else '▼' }} {{ sig.direction }} · {{ sig.confidence }}%</span>
+      </div>
+      <div style="display:flex;gap:12px;font-size:11px">
+        <span>Entry: <strong class="mono">{{ sig.entry_price }}</strong></span>
+        <span>SL: <strong class="text-red mono">{{ sig.stop_loss }}</strong></span>
+        <span>TP: <strong class="text-green mono">{{ sig.take_profit }}</strong></span>
+      </div>
+      <a href="{{ url_for('trading.live', pair=sig.pair.replace('/','_')) }}" class="btn btn-sm mt-8" style="margin-top:8px">Trade Now →</a>
+    </div>{% endfor %}
+    <a href="{{ url_for('trading.signals') }}" class="btn btn-sm">View all signals →</a>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="card"><div class="card-header mb-12"><div class="card-title">⚡ Quick Actions</div></div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:7px">
+      <a href="{{ url_for('trading.live_default') }}" class="btn btn-gold btn-block">⚡ Live Trading</a>
+      <a href="{{ url_for('trading.positions_page') }}" class="btn btn-block">📂 Positions</a>
+      <a href="{{ url_for('auth.wallet') }}" class="btn btn-green btn-block">💳 Deposit</a>
+      <a href="{{ url_for('support.chat') }}" class="btn btn-block">💬 Support</a>
+    </div></div>
+    <div class="card"><div class="card-header mb-12"><div class="card-title">🌍 Sessions</div></div>
+    <div class="card-body">{% for name,s in sessions.items() %}
+      <div class="sess-chip {{ 'active' if s.active else 'inactive' }}" style="width:100%;margin-bottom:6px">
+        <div class="sess-dot {{ 'active' if s.active else 'inactive' }}"></div><span style="flex:1">{{ name }}</span>
+        <span class="text-xs text-muted">{{ s.open }}:00</span>
+      </div>{% endfor %}</div></div>
+  </div>
+</div>
+{% endblock %}

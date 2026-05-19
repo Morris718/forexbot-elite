@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Forex Bot Pro{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #252b3d;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-gold: #f59e0b;
+            --accent-blue: #3b82f6;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border: #374151;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: var(--bg-card);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+        .navbar-nav { display: flex; gap: 1rem; list-style: none; }
+        .navbar-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .navbar-nav a:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .flash-messages { margin-bottom: 1rem; }
+        .flash {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .flash-success { background: rgba(16,185,129,0.2); border: 1px solid var(--accent-green); }
+        .flash-danger { background: rgba(239,68,68,0.2); border: 1px solid var(--accent-red); }
+        .flash-warning { background: rgba(245,158,11,0.2); border: 1px solid var(--accent-gold); }
+        .flash-info { background: rgba(59,130,246,0.2); border: 1px solid var(--accent-blue); }
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-success { background: var(--accent-green); color: white; }
+        .btn-danger { background: var(--accent-red); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .form-control:focus { outline: none; border-color: var(--accent-gold); }
+        .text-gold { color: var(--accent-gold); }
+        .text-profit { color: var(--accent-green); }
+        .text-loss { color: var(--accent-red); }
+        .text-muted { color: var(--text-secondary); }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; }
+            .navbar-nav { flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <nav class="navbar">
+        <div class="navbar-brand"><i class="fas fa-chart-line"></i> Forex Bot Pro</div>
+        <ul class="navbar-nav">
+            <li><a href="{{ url_for('trading.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('wallet.index') }}"><i class="fas fa-wallet"></i> Wallet</a></li>
+            <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </nav>
+    {% endif %}
+    
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+    <footer class="footer">
+        <p>&copy; {{ year }} Forex Bot Pro. All rights reserved.</p>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

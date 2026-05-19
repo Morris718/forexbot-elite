@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+.env.local
+.env.*
+venv/
+env/
+.venv/
+
+# Database
+instance/
+*.db
+*.sqlite
+*.sqlite3
+forex_bot.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secrets
+secrets.txt
+config.ini
+credentials.json
+*.pem
+*.key

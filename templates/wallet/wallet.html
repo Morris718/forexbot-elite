@@ -1,0 +1,39 @@
+﻿{% extends "base.html" %}{% block title %}Wallet{% endblock %}{% block page_title %}💳 Wallet{% endblock %}
+{% block content %}<div style="max-width:900px">
+<div class="grid-2 mb-20">
+  <div style="background:linear-gradient(135deg,#0f1e40,#1a2d55);border:1px solid rgba(240,180,41,0.2);border-radius:var(--radius);padding:24px">
+    <div class="text-xs text-muted mb-8">LIVE BALANCE</div>
+    <div style="font-size:32px;font-weight:900;font-family:'JetBrains Mono',monospace">${{ "%.2f"|format(current_user.balance) }}</div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button onclick="document.getElementById('dep-modal').style.display='flex'" class="btn btn-green btn-sm">⬆ Deposit</button>
+      <button onclick="document.getElementById('wit-modal').style.display='flex'" class="btn btn-red btn-sm">⬇ Withdraw</button>
+    </div>
+  </div>
+  <div style="background:linear-gradient(135deg,#0d1f30,#142840);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:24px">
+    <div class="text-xs text-muted mb-8">DEMO BALANCE</div>
+    <div style="font-size:32px;font-weight:900;color:var(--blue);font-family:'JetBrains Mono',monospace">${{ "%.2f"|format(current_user.demo_balance) }}</div>
+  </div>
+</div>
+<div class="card"><div class="card-header mb-16"><div class="card-title">Transaction History</div></div>
+<div class="card-body" style="overflow-x:auto">
+{% if txns %}<table class="mkt-table"><thead><tr><th>Type</th><th>Ref</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>
+{% for t in txns %}<tr><td>{{ t.type|capitalize }}</td><td class="font-mono text-xs text-muted">{{ t.reference }}</td>
+<td class="font-mono font-bold {{ 'text-green' if t.type=='deposit' else 'text-red' }}">{{ '+' if t.type=='deposit' else '-' }}${{ "%.2f"|format(t.amount) }}</td>
+<td><span class="status-pill sp-{{ t.status }}">{{ t.status }}</span></td>
+<td class="text-xs text-muted">{{ t.created_at.strftime("%d %b %Y %H:%M") }}</td></tr>{% endfor %}
+</tbody></table>{% else %}<div style="text-align:center;padding:40px;color:var(--muted)">No transactions yet</div>{% endif %}
+</div></div></div>
+<div id="dep-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:20px">
+<div class="card" style="width:100%;max-width:400px"><div class="card-header" style="padding-bottom:14px;border-bottom:1px solid var(--border)"><div class="card-title">💳 Deposit</div><button onclick="this.closest('[id]').style.display='none'" class="btn btn-sm">×</button></div>
+<div class="card-body"><form method="POST" action="{{ url_for('auth.deposit') }}">{{ dep_form.hidden_tag() }}
+<div class="form-group">{{ dep_form.amount.label(class="form-label") }}{{ dep_form.amount(class="form-control",placeholder="1000") }}</div>
+<div class="form-group">{{ dep_form.method.label(class="form-label") }}{{ dep_form.method(class="form-control") }}</div>
+<div style="display:flex;gap:6px;margin-bottom:14px">{% for a in ["500","1000","5000","10000"] %}<button type="button" class="btn btn-sm" onclick="this.closest('form').querySelector('[name=amount]').value='{{a}}'">${{a}}</button>{% endfor %}</div>
+{{ dep_form.submit(class="btn btn-green btn-block") }}</form></div></div></div>
+<div id="wit-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:20px">
+<div class="card" style="width:100%;max-width:400px"><div class="card-header" style="padding-bottom:14px;border-bottom:1px solid var(--border)"><div class="card-title">⬇ Withdraw</div><button onclick="this.closest('[id]').style.display='none'" class="btn btn-sm">×</button></div>
+<div class="card-body"><form method="POST" action="{{ url_for('auth.withdraw') }}">{{ wit_form.hidden_tag() }}
+<div class="form-group">{{ wit_form.amount.label(class="form-label") }}{{ wit_form.amount(class="form-control",placeholder="500") }}</div>
+<div class="form-group">{{ wit_form.method.label(class="form-label") }}{{ wit_form.method(class="form-control") }}</div>
+{{ wit_form.submit(class="btn btn-red btn-block") }}</form></div></div></div>
+{% endblock %}

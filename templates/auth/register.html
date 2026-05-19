@@ -1,0 +1,23 @@
+﻿{% extends "auth/auth_base.html" %}{% block title %}Register{% endblock %}
+{% block content %}
+<div class="auth-box" style="max-width:470px;width:100%">
+  <div class="auth-header"><div class="auth-logo">F</div><div class="auth-title">Create account</div><div class="auth-sub">Start with $100K demo</div></div>
+  <div class="auth-body">
+    <form method="POST" action="{{ url_for('auth.register') }}">{{ form.hidden_tag() }}
+      <div class="form-group">{{ form.full_name.label(class="form-label") }}{{ form.full_name(class="form-control",placeholder="John Doe") }}{% for e in form.full_name.errors %}<div class="form-error">{{e}}</div>{% endfor %}</div>
+      <div class="form-group">{{ form.email.label(class="form-label") }}{{ form.email(class="form-control",placeholder="name@example.com") }}{% for e in form.email.errors %}<div class="form-error">{{e}}</div>{% endfor %}</div>
+      <div class="form-row">
+        <div class="form-group">{{ form.phone.label(class="form-label") }}{{ form.phone(class="form-control",placeholder="+1 555 0100") }}</div>
+        <div class="form-group">{{ form.country.label(class="form-label") }}{{ form.country(class="form-control",placeholder="Country") }}</div>
+      </div>
+      <div class="form-group">{{ form.password.label(class="form-label") }}{{ form.password(class="form-control",placeholder="Min 8 chars") }}{% for e in form.password.errors %}<div class="form-error">{{e}}</div>{% endfor %}</div>
+      <div class="form-group">{{ form.confirm_password.label(class="form-label") }}{{ form.confirm_password(class="form-control",placeholder="Repeat") }}{% for e in form.confirm_password.errors %}<div class="form-error">{{e}}</div>{% endfor %}</div>
+      <div class="form-check mb-16">{{ form.accept_terms() }}<label for="accept_terms" style="font-size:11px;color:var(--muted)">I agree to the <a href="#" style="color:var(--gold)">Terms</a></label></div>
+      {% for e in form.accept_terms.errors %}<div class="form-error mb-8">{{e}}</div>{% endfor %}
+      {{ form.submit(class="btn btn-gold btn-block btn-lg") }}
+    </form>
+    <div class="divider"><div class="divider-line"></div><span class="divider-text">HAVE ACCOUNT?</span><div class="divider-line"></div></div>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-block" style="justify-content:center">Sign in →</a>
+  </div>
+</div>
+{% endblock %}

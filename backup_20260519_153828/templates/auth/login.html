@@ -1,0 +1,71 @@
+﻿{% extends "base.html" %}
+{% block title %}Login - Forex Bot Pro{% endblock %}
+{% block content %}
+<div style="max-width:450px;margin:3rem auto;">
+    <div class="card">
+        <div style="text-align:center;margin-bottom:2rem;">
+            <i class="fas fa-chart-line" style="font-size:3rem;color:var(--accent-gold);margin-bottom:1rem;"></i>
+            <h1 style="color:var(--text-primary);">Welcome Back</h1>
+            <p style="color:var(--text-secondary);">Sign in to your trading account</p>
+        </div>
+        
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control", placeholder="your@email.com") }}
+                {% for error in form.email.errors %}
+                <small style="color:var(--accent-red);">{{ error }}</small>
+                {% endfor %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control", placeholder="••••••••") }}
+                {% for error in form.password.errors %}
+                <small style="color:var(--accent-red);">{{ error }}</small>
+                {% endfor %}
+            </div>
+            
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                <label style="display:flex;align-items:center;gap:0.5rem;color:var(--text-secondary);cursor:pointer;">
+                    {{ form.remember() }} Remember Me
+                </label>
+                <a href="#" style="color:var(--accent-gold);text-decoration:none;font-size:0.9rem;">Forgot Password?</a>
+            </div>
+            
+            {{ form.submit(class="btn btn-primary", style="width:100%;") }}
+        </form>
+        
+        <div style="text-align:center;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+            <p style="color:var(--text-secondary);">Don't have an account?</p>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline" style="margin-top:0.5rem;">
+                <i class="fas fa-user-plus"></i> Create Account
+            </a>
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top:1rem;">
+        <h3 style="color:var(--accent-gold);margin-bottom:1rem;"><i class="fas fa-shield-alt"></i> Security Features</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div style="padding:0.75rem;background:rgba(16,185,129,0.1);border-radius:8px;">
+                <i class="fas fa-lock" style="color:var(--accent-green);"></i>
+                <span style="margin-left:0.5rem;color:var(--text-secondary);">Encrypted Passwords</span>
+            </div>
+            <div style="padding:0.75rem;background:rgba(59,130,246,0.1);border-radius:8px;">
+                <i class="fas fa-user-shield" style="color:var(--accent-blue);"></i>
+                <span style="margin-left:0.5rem;color:var(--text-secondary);">Session Protection</span>
+            </div>
+            <div style="padding:0.75rem;background:rgba(245,158,11,0.1);border-radius:8px;">
+                <i class="fas fa-envelope" style="color:var(--accent-gold);"></i>
+                <span style="margin-left:0.5rem;color:var(--text-secondary);">Email Validation</span>
+            </div>
+            <div style="padding:0.75rem;background:rgba(239,68,68,0.1);border-radius:8px;">
+                <i class="fas fa-exclamation-triangle" style="color:var(--accent-red);"></i>
+                <span style="margin-left:0.5rem;color:var(--text-secondary);">Failed Login Alerts</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

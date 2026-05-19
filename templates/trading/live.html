@@ -1,0 +1,169 @@
+﻿{% extends "base.html" %}
+{% block title %}Live Trading — {{ active_pair }}{% endblock %}
+{% block page_title %}⚡ Live Trading{% endblock %}
+{% block content %}
+
+<div class="ticker-strip mb-12">
+  {% for pair, p in snap.items() %}
+  <div class="ticker-item {{ 'active' if pair==active_pair }}" data-pair="{{ pair }}" onclick="selectPair('{{ pair }}')">
+    <div class="ticker-pair">{{ pair }}</div>
+    <div class="ticker-price" data-prev="{{ p.mid }}">{{ p.mid }}</div>
+    <div class="ticker-chg {{ 'pos' if p.change_pct>=0 else 'neg' }}">{{ '+' if p.change_pct>=0 else '' }}{{ p.change_pct }}%</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="session-ticker mb-16">
+  {% for name, s in sessions.items() %}
+  <div class="sess-chip {{ 'active' if s.active else 'inactive' }}" data-session="{{ name }}">
+    <div class="sess-dot {{ 'active' if s.active else 'inactive' }}"></div>{{ name }}
+  </div>{% endfor %}
+  <div style="margin-left:auto;font-size:11px;color:var(--green);display:flex;align-items:center;gap:5px">
+    <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green)"></span>Live Feed
+  </div>
+</div>
+
+<div class="trading-shell">
+  <div class="trading-left">
+
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <select id="pair-select" class="chart-pair-sel">
+          {% for pair in pairs %}<option value="{{ pair }}" {{ 'selected' if pair==active_pair }}>{{ pair }}</option>{% endfor %}
+        </select>
+        <div>
+          <div id="chart-price" class="chart-price" data-prev="{{ snap[active_pair].mid }}">{{ snap[active_pair].mid }}</div>
+        </div>
+        <div id="chart-change" class="chart-change {{ 'pos' if snap[active_pair].change_pct>=0 else 'neg' }}">
+          {{ '+' if snap[active_pair].change_pct>=0 else '' }}{{ snap[active_pair].change_pct }}%
+        </div>
+        <div style="display:flex;gap:14px">
+          <div class="ba-item"><div class="ba-label">Bid</div><div id="chart-bid" class="ba-val bid">{{ snap[active_pair].bid }}</div></div>
+          <div class="ba-item"><div class="ba-label">Ask</div><div id="chart-ask" class="ba-val ask">{{ snap[active_pair].ask }}</div></div>
+          <div class="ba-item"><div class="ba-label">High</div><div id="chart-high" class="ba-val" style="color:var(--green)">{{ snap[active_pair].high }}</div></div>
+          <div class="ba-item"><div class="ba-label">Low</div><div id="chart-low" class="ba-val" style="color:var(--red)">{{ snap[active_pair].low }}</div></div>
+          <div class="ba-item"><div class="ba-label">Spread</div><div id="chart-spread" class="ba-val text-muted">{{ snap[active_pair].spread }}</div></div>
+        </div>
+        <div class="chart-tf-btns">
+          <button class="tf-btn" onclick="setTF(30,this)">30</button>
+          <button class="tf-btn active" onclick="setTF(60,this)">60</button>
+          <button class="tf-btn" onclick="setTF(120,this)">120</button>
+          <button class="tf-btn" onclick="setTF(200,this)">200</button>
+        </div>
+      </div>
+      <canvas id="liveChart"></canvas>
+    </div>
+
+    <div class="positions-panel">
+      <div class="pos-header">
+        <div><div class="card-title">📂 Open Positions ({{ positions|length }})</div></div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="text-sm">Float P&L:</span>
+          <span class="total-open-pnl font-mono font-bold {{ 'text-green' if positions|sum(attribute='profit_loss')>=0 else 'text-red' }}">
+            {{ '+' if positions|sum(attribute='profit_loss')>=0 else '' }}${{ "%.2f"|format(positions|sum(attribute='profit_loss')) }}
+          </span>
+          <a href="{{ url_for('trading.positions_page') }}" class="btn btn-sm">Full View →</a>
+        </div>
+      </div>
+      {% if positions %}
+      <div style="overflow-x:auto">
+        <table class="pos-table">
+          <thead><tr><th>#</th><th>Pair</th><th>Dir</th><th>Lots</th><th>Entry</th><th>Current</th><th>P&L</th><th></th></tr></thead>
+          <tbody id="positions-tbody">
+            {% for p in positions %}
+            <tr data-pos-id="{{ p.id }}">
+              <td class="text-muted text-xs">#{{ p.id }}</td>
+              <td class="font-bold" style="font-size:12px">{{ p.pair }}</td>
+              <td><span class="dir-chip {{ 'buy' if p.direction=='BUY' else 'sell' }}">{{ '▲' if p.direction=='BUY' else '▼' }} {{ p.direction }}</span></td>
+              <td class="mono">{{ p.lot_size }}</td>
+              <td class="mono">{{ p.entry_price }}</td>
+              <td class="mono live-cp">{{ p.current_price or p.entry_price }}</td>
+              <td><span class="pnl-val live-pnl {{ 'pnl-pos' if p.profit_loss>=0 else 'pnl-neg' }}">{{ '+' if p.profit_loss>=0 else '' }}{{ "%.2f"|format(p.profit_loss) }}</span></td>
+              <td>
+                <form method="POST" action="{{ url_for('trading.close_position',pos_id=p.id) }}" style="margin:0">
+                  <input type="hidden" name="csrf_token" value="">
+                  <input type="hidden" name="redirect" value="{{ url_for('trading.live', pair=active_pair.replace('/','_')) }}">
+                  <button type="submit" class="close-pos-btn">Close</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:24px;color:var(--muted)">No open positions. Place a trade →</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="trading-right">
+    <div class="order-panel">
+      <div class="order-tabs">
+        <button class="order-tab buy" data-dir="BUY">▲ BUY</button>
+        <button class="order-tab sell" data-dir="SELL">▼ SELL</button>
+      </div>
+      <div class="order-body">
+        <form method="POST" action="{{ url_for('trading.open_position') }}">
+          <input type="hidden" name="csrf_token" value="">
+          <input type="hidden" name="direction" id="order-direction" value="BUY">
+          <input type="hidden" name="pair" id="sl-pair" value="{{ active_pair }}">
+          <input type="hidden" name="redirect" value="{{ url_for('trading.live', pair=active_pair.replace('/','_')) }}">
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;text-align:center">
+            <div class="text-xs text-muted mb-8">MARKET PRICE</div>
+            <div id="order-price" style="font-size:28px;font-weight:900;font-family:'JetBrains Mono',monospace">{{ snap[active_pair].mid }}</div>
+            <div style="display:flex;justify-content:center;gap:20px;margin-top:8px">
+              <div><div class="ba-label">Bid</div><div id="order-bid" class="ba-val bid" style="font-size:12px">{{ snap[active_pair].bid }}</div></div>
+              <div><div class="ba-label">Ask</div><div id="order-ask" class="ba-val ask" style="font-size:12px">{{ snap[active_pair].ask }}</div></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Lot Size</label>
+            <select name="lot_size" class="form-control">
+              <option value="0.01">0.01 — Micro</option>
+              <option value="0.05">0.05</option>
+              <option value="0.10" selected>0.10 — Mini</option>
+              <option value="0.25">0.25</option>
+              <option value="0.50">0.50</option>
+              <option value="1.00">1.00 — Standard</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Stop Loss</label><input type="text" name="stop_loss" class="form-control" placeholder="Optional"></div>
+            <div class="form-group"><label class="form-label">Take Profit</label><input type="text" name="take_profit" class="form-control" placeholder="Optional"></div>
+          </div>
+          <button type="submit" id="submit-order" class="buy-btn"><span style="font-size:18px">▲</span> PLACE BUY ORDER</button>
+        </form>
+        <div style="margin-top:12px;padding:10px;background:var(--bg2);border-radius:var(--radius-xs);font-size:11px;color:var(--muted);text-align:center">
+          {{ "⚠️ DEMO MODE — virtual funds" if current_user.demo_mode else "🔴 LIVE MODE — real funds at risk" }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header mb-12"><div class="card-title">📰 Economic Calendar</div></div>
+      <div class="card-body" style="padding-top:0">
+        {% for n in news %}
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span class="font-mono text-xs text-muted" style="width:38px">{{ n.time }}</span>
+          <span style="font-size:10px;font-weight:700;width:26px">{{ n.currency }}</span>
+          <span style="font-size:11px;flex:1">{{ n.event }}</span>
+          <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:20px;
+            background:{{ 'var(--red-dim)' if n.impact=='high' else 'var(--gold-dim)' }};
+            color:{{ 'var(--red)' if n.impact=='high' else 'var(--gold)' }}">{{ n.impact|upper }}</span>
+        </div>{% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="display:flex;flex-direction:column;gap:7px">
+        <a href="{{ url_for('trading.positions_page') }}" class="btn btn-block">📂 All Positions</a>
+        <a href="{{ url_for('trading.signals') }}" class="btn btn-gold btn-block">🎯 AI Signals</a>
+        <a href="{{ url_for('support.chat') }}" class="btn btn-block">💬 Live Support</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

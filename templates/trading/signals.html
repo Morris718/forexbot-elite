@@ -1,0 +1,42 @@
+﻿{% extends "base.html" %}{% block title %}AI Signals{% endblock %}{% block page_title %}🎯 AI Signals{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-20" style="flex-wrap:wrap;gap:10px">
+  <div><div class="section-title">Live AI Signal Feed</div><div class="section-sub">Multi-layer analysis · Real-time</div></div>
+  <a href="{{ url_for('trading.live_default') }}" class="btn btn-gold">⚡ Live Trading →</a>
+</div>
+<div style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))">
+{% for sig in signals %}{% set dir=sig.direction|lower %}
+<div class="card" style="border-top:2px solid {{ 'var(--green)' if dir=='buy' else 'var(--red)' }};padding:16px">
+  <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+    <span style="font-size:15px;font-weight:800">{{ sig.pair }}</span>
+    <span class="dir-chip {{ dir }}">{{ '▲' if dir=='buy' else '▼' }} {{ sig.direction }}</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+    <span class="text-xs text-muted">Confidence</span>
+    <span style="font-size:13px;font-weight:800">{{ sig.confidence }}%</span>
+  </div>
+  <div style="height:5px;border-radius:3px;background:rgba(255,255,255,0.06);margin-bottom:12px;overflow:hidden">
+    <div style="width:{{ sig.confidence }}%;height:100%;border-radius:3px;background:{{ 'var(--green)' if sig.confidence>=75 else 'var(--gold)' if sig.confidence>=55 else 'var(--red)' }}"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+    <div style="background:rgba(255,255,255,0.03);border-radius:5px;padding:7px 9px"><div class="text-xs text-muted">Technical</div><div style="font-size:12px;font-weight:700;color:var(--blue)">{{ sig.tech_score }}%</div></div>
+    <div style="background:rgba(255,255,255,0.03);border-radius:5px;padding:7px 9px"><div class="text-xs text-muted">Sentiment</div><div style="font-size:12px;font-weight:700;color:var(--purple)">{{ sig.sentiment_score }}%</div></div>
+    <div style="background:rgba(255,255,255,0.03);border-radius:5px;padding:7px 9px"><div class="text-xs text-muted">ML Model</div><div style="font-size:12px;font-weight:700;color:var(--cyan)">{{ sig.ml_score }}%</div></div>
+    <div style="background:rgba(255,255,255,0.03);border-radius:5px;padding:7px 9px"><div class="text-xs text-muted">Fundamental</div><div style="font-size:12px;font-weight:700;color:var(--gold)">{{ sig.fundamental_score }}%</div></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <div style="flex:1;min-width:60px"><div class="text-xs text-muted">Entry</div><div class="mono" style="font-size:12px;font-weight:700">{{ sig.entry_price }}</div></div>
+    <div style="flex:1;min-width:60px"><div class="text-xs text-muted">SL</div><div class="mono text-red" style="font-size:12px;font-weight:700">{{ sig.stop_loss }}</div></div>
+    <div style="flex:1;min-width:60px"><div class="text-xs text-muted">TP</div><div class="mono text-green" style="font-size:12px;font-weight:700">{{ sig.take_profit }}</div></div>
+    <div style="flex:1;min-width:60px"><div class="text-xs text-muted">R:R</div><div class="mono text-gold" style="font-size:12px;font-weight:700">1:{{ sig.risk_reward }}</div></div>
+  </div>
+  <div class="text-xs text-muted mb-12" style="background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:8px;border-radius:5px;line-height:1.5">
+    <span style="color:var(--gold);font-weight:700">🤖 AI:</span> {{ sig.reasoning }}
+  </div>
+  <a href="{{ url_for('trading.live', pair=sig.pair.replace('/','_')) }}" class="btn {{ 'btn-green' if dir=='buy' else 'btn-red' }} btn-block btn-sm">
+    Trade {{ sig.direction }} on {{ sig.pair }}
+  </a>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

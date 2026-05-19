@@ -1,0 +1,7 @@
+﻿{% extends "base.html" %}{% block title %}Analytics{% endblock %}{% block page_title %}🔬 Analytics{% endblock %}
+{% block content %}
+<div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:24px">
+{% for v,l,c in [(perf.win_rate|string+"%","Win Rate","text-green"),(perf.profit_factor|string+"x","P-Factor","text-gold"),(perf.sharpe_ratio|string,"Sharpe","text-blue"),("-"+perf.max_drawdown|string+"%","Max DD","text-red")] %}
+<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:14px;text-align:center"><div style="font-size:20px;font-weight:900" class="{{c}}">{{v}}</div><div class="text-xs text-muted mt-8">{{l}}</div></div>{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+﻿{% extends "base.html" %}{% block title %}Markets{% endblock %}{% block page_title %}📈 Markets{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header mb-16"><div class="card-title">Live Prices</div><div style="font-size:10px;color:var(--green)">● WebSocket</div></div>
+  <div class="card-body" style="overflow-x:auto">
+    <table class="mkt-table"><thead><tr><th>Pair</th><th>Price</th><th>Bid</th><th>Ask</th><th>Change</th><th></th></tr></thead>
+    <tbody>{% for pair, p in prices.items() %}
+    <tr data-pair="{{ pair }}">
+      <td><div class="pair-cell"><div class="pair-icon">💱</div><div><div class="pair-name">{{ pair }}</div></div></div></td>
+      <td><span class="mono live-price" data-prev="{{ p.mid }}">{{ p.mid }}</span></td>
+      <td><span class="mono text-muted">{{ p.bid }}</span></td>
+      <td><span class="mono text-muted">{{ p.ask }}</span></td>
+      <td><span class="chg-pill live-change {{ 'pos' if p.change_pct>=0 else 'neg' }}">{{ '+' if p.change_pct>=0 else '' }}{{ p.change_pct }}%</span></td>
+      <td><a href="{{ url_for('trading.live', pair=pair.replace('/','_')) }}" class="btn btn-sm">Trade →</a></td>
+    </tr>{% endfor %}</tbody></table>
+  </div>
+</div>
+{% endblock %}

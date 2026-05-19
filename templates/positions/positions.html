@@ -1,0 +1,185 @@
+﻿{% extends "base.html" %}
+{% block title %}Positions{% endblock %}
+{% block page_title %}📂 Positions{% endblock %}
+{% block content %}
+
+<div class="stat-grid mb-20">
+  <div class="stat-card sc-gold"><div class="stat-icon si-gold">📂</div><div class="stat-label">Open Positions</div><div class="stat-value">{{ open_pos|length }}</div></div>
+  <div class="stat-card {{ 'sc-green' if total_open_pnl>=0 else 'sc-red' }}"><div class="stat-icon {{ 'si-green' if total_open_pnl>=0 else 'si-red' }}">💰</div><div class="stat-label">Floating P&L</div><div class="stat-value total-open-pnl">{{ '+' if total_open_pnl>=0 else '' }}${{ "%.2f"|format(total_open_pnl) }}</div></div>
+  <div class="stat-card sc-blue"><div class="stat-icon si-blue">✅</div><div class="stat-label">Closed Trades</div><div class="stat-value">{{ closed_pos|length }}</div></div>
+  <div class="stat-card {{ 'sc-green' if total_closed_pnl>=0 else 'sc-red' }}"><div class="stat-icon {{ 'si-green' if total_closed_pnl>=0 else 'si-red' }}">📊</div><div class="stat-label">Realised P&L</div><div class="stat-value">{{ '+' if total_closed_pnl>=0 else '' }}${{ "%.2f"|format(total_closed_pnl) }}</div></div>
+</div>
+
+<div class="card mb-20">
+  <div class="card-header mb-16"><div><div class="card-title">⚡ Quick Trade</div><div class="card-sub">Open a new position instantly</div></div></div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('trading.open_position') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <input type="hidden" name="csrf_token" value="">
+      <input type="hidden" name="redirect" value="{{ url_for('trading.positions_page') }}">
+      <div class="form-group" style="margin-bottom:0;min-width:140px">
+        <label class="form-label">Pair</label>
+        <select name="pair" class="form-control">{% for p in pairs %}<option>{{ p }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:100px">
+        <label class="form-label">Direction</label>
+        <select name="direction" class="form-control">
+          <option value="BUY">▲ BUY</option><option value="SELL">▼ SELL</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:100px">
+        <label class="form-label">Lot Size</label>
+        <select name="lot_size" class="form-control">
+          <option value="0.01">0.01</option><option value="0.05">0.05</option>
+          <option value="0.10" selected>0.10</option><option value="0.25">0.25</option>
+          <option value="0.50">0.50</option><option value="1.00">1.00</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:90px">
+        <label class="form-label">Stop Loss</label>
+        <input type="text" name="stop_loss" class="form-control" placeholder="Optional">
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:90px">
+        <label class="form-label">Take Profit</label>
+        <input type="text" name="take_profit" class="form-control" placeholder="Optional">
+      </div>
+      <button type="submit" class="btn btn-green btn-lg" style="margin-bottom:0">🟢 Open Position</button>
+    </form>
+  </div>
+</div>
+
+<div class="tab-wrapper">
+  <div class="tabs">
+    <button class="tab-btn" data-tab="tab-open">Open Positions ({{ open_pos|length }})</button>
+    <button class="tab-btn" data-tab="tab-closed">Trade History ({{ closed_pos|length }})</button>
+  </div>
+
+  <div class="tab-content" id="tab-open">
+    <div class="card">
+      <div class="pos-header">
+        <div class="card-title">Active Positions</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="total-open-pnl font-mono font-bold {{ 'text-green' if total_open_pnl>=0 else 'text-red' }}">
+            Float: {{ '+' if total_open_pnl>=0 else '' }}${{ "%.2f"|format(total_open_pnl) }}
+          </span>
+          {% if open_pos %}
+          <form method="POST" action="{{ url_for('trading.close_all_positions') }}" style="margin:0">
+            <input type="hidden" name="csrf_token" value="">
+            <button type="submit" class="close-all-btn" onclick="return confirm('Close ALL positions?')">✕ Close All</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% if open_pos %}
+      <div style="overflow-x:auto">
+        <table class="pos-table">
+          <thead><tr><th>#</th><th>Pair</th><th>Direction</th><th>Lots</th><th>Entry</th><th>Current</th><th>SL</th><th>TP</th><th>P&L</th><th>Mode</th><th>Opened</th><th>Action</th></tr></thead>
+          <tbody id="positions-tbody">
+            {% for p in open_pos %}
+            <tr data-pos-id="{{ p.id }}" style="border-left:3px solid {{ 'var(--green)' if p.direction=='BUY' else 'var(--red)' }}">
+              <td class="text-muted text-xs">#{{ p.id }}</td>
+              <td>
+                <a href="{{ url_for('trading.live', pair=p.pair.replace('/','_')) }}" class="font-bold" style="color:var(--text);text-decoration:none;font-size:12px">
+                  {{ p.pair }}
+                </a>
+              </td>
+              <td><span class="dir-chip {{ 'buy' if p.direction=='BUY' else 'sell' }}">{{ '▲' if p.direction=='BUY' else '▼' }} {{ p.direction }}</span></td>
+              <td class="mono">{{ p.lot_size }}</td>
+              <td class="mono">{{ p.entry_price }}</td>
+              <td class="mono live-cp">{{ p.current_price or p.entry_price }}</td>
+              <td class="mono text-red">{{ p.stop_loss or '—' }}</td>
+              <td class="mono text-green">{{ p.take_profit or '—' }}</td>
+              <td>
+                <span class="pnl-val live-pnl {{ 'pnl-pos' if p.profit_loss>=0 else 'pnl-neg' }}">
+                  {{ '+' if p.profit_loss>=0 else '' }}{{ "%.2f"|format(p.profit_loss) }}
+                </span>
+              </td>
+              <td><span class="mode-pill {{ 'demo' if p.is_demo else 'live' }}">{{ 'DEMO' if p.is_demo else 'LIVE' }}</span></td>
+              <td class="text-xs text-muted">{{ p.opened_at.strftime("%H:%M:%S") }}</td>
+              <td>
+                <form method="POST" action="{{ url_for('trading.close_position',pos_id=p.id) }}" style="margin:0">
+                  <input type="hidden" name="csrf_token" value="">
+                  <input type="hidden" name="redirect" value="{{ url_for('trading.positions_page') }}">
+                  <button type="submit" class="close-pos-btn">✕ Close</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:50px;color:var(--muted)">
+        <div style="font-size:40px;margin-bottom:10px">📂</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">No open positions</div>
+        <div class="text-sm mb-16">Use Quick Trade above or go to Live Trading</div>
+        <a href="{{ url_for('trading.live_default') }}" class="btn btn-gold">⚡ Start Live Trading</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-closed">
+    <div class="card">
+      <div class="pos-header">
+        <div class="card-title">Trade History</div>
+        <div class="font-mono font-bold {{ 'text-green' if total_closed_pnl>=0 else 'text-red' }}">
+          Total: {{ '+' if total_closed_pnl>=0 else '' }}${{ "%.2f"|format(total_closed_pnl) }}
+        </div>
+      </div>
+      {% if closed_pos %}
+      <div style="overflow-x:auto">
+        <table class="pos-table">
+          <thead><tr><th>#</th><th>Pair</th><th>Dir</th><th>Lots</th><th>Entry</th><th>Close</th><th>P&L</th><th>Mode</th><th>Duration</th><th>Closed At</th></tr></thead>
+          <tbody>
+            {% for p in closed_pos %}
+            {% set dur = (p.closed_at - p.opened_at) if p.closed_at else None %}
+            <tr style="border-left:3px solid {{ 'var(--green)' if p.profit_loss>=0 else 'var(--red)' }}">
+              <td class="text-muted text-xs">#{{ p.id }}</td>
+              <td class="font-bold" style="font-size:12px">{{ p.pair }}</td>
+              <td><span class="dir-chip {{ 'buy' if p.direction=='BUY' else 'sell' }}">{{ '▲' if p.direction=='BUY' else '▼' }} {{ p.direction }}</span></td>
+              <td class="mono">{{ p.lot_size }}</td>
+              <td class="mono">{{ p.entry_price }}</td>
+              <td class="mono">{{ p.close_price or '—' }}</td>
+              <td>
+                <span class="pnl-val {{ 'pnl-pos' if p.profit_loss>=0 else 'pnl-neg' }}">
+                  {{ '+' if p.profit_loss>=0 else '' }}${{ "%.2f"|format(p.profit_loss) }}
+                </span>
+              </td>
+              <td><span class="mode-pill {{ 'demo' if p.is_demo else 'live' }}">{{ 'DEMO' if p.is_demo else 'LIVE' }}</span></td>
+              <td class="text-xs text-muted">{{ dur.total_seconds()|int // 60 if dur else '—' }}m</td>
+              <td class="text-xs text-muted">{{ p.closed_at.strftime("%d %b %H:%M") if p.closed_at else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:50px;color:var(--muted)">No closed trades yet</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const poll = () => {
+    fetch("/trading/api/positions").then(r=>r.json()).then(positions => {
+      positions.forEach(p => {
+        const row = document.querySelector(`tr[data-pos-id="${p.id}"]`);
+        if (!row) return;
+        const pnl = row.querySelector(".live-pnl");
+        if (pnl) { pnl.textContent = (p.profit_loss>=0?"+":"")+p.profit_loss.toFixed(2); pnl.className = "pnl-val live-pnl "+(p.profit_loss>=0?"pnl-pos":"pnl-neg"); }
+        const cp = row.querySelector(".live-cp"); if (cp) cp.textContent = p.current_price;
+      });
+      const total = positions.reduce((s,p)=>s+p.profit_loss, 0);
+      document.querySelectorAll(".total-open-pnl").forEach(el => {
+        el.textContent = (total>=0?"+":"")+"$"+total.toFixed(2);
+        el.className = "total-open-pnl font-mono font-bold "+(total>=0?"text-green":"text-red");
+      });
+    }).catch(()=>{});
+  };
+  poll(); setInterval(poll, 1200);
+});
+</script>
+{% endblock %}

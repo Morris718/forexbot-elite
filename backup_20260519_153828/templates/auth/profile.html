@@ -1,0 +1,78 @@
+﻿{% extends "base.html" %}
+{% block title %}Profile - Forex Bot Pro{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto;">
+    <h1 style="color:var(--text-primary);margin-bottom:2rem;">
+        <i class="fas fa-user-circle" style="color:var(--accent-gold);"></i> My Profile
+    </h1>
+    
+    <div class="card">
+        <h2 style="color:var(--text-primary);margin-bottom:1.5rem;">Account Information</h2>
+        <form method="POST" action="{{ url_for('auth.update_profile') }}">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" value="{{ user.email }}" disabled style="opacity:0.6;">
+                <small style="color:var(--text-secondary);">Email cannot be changed</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Country</label>
+                <input type="text" name="country" class="form-control" value="{{ user.country }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+    
+    <div class="card" style="margin-top:1.5rem;">
+        <h2 style="color:var(--text-primary);margin-bottom:1.5rem;">Account Statistics</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div style="padding:1rem;background:rgba(16,185,129,0.1);border-radius:8px;">
+                <div style="color:var(--text-secondary);font-size:0.9rem;">Member Since</div>
+                <div style="color:var(--accent-green);font-weight:700;">{{ user.created_at.strftime('%b %d, %Y') }}</div>
+            </div>
+            <div style="padding:1rem;background:rgba(59,130,246,0.1);border-radius:8px;">
+                <div style="color:var(--text-secondary);font-size:0.9rem;">Total Logins</div>
+                <div style="color:var(--accent-blue);font-weight:700;">{{ user.login_count }}</div>
+            </div>
+            <div style="padding:1rem;background:rgba(245,158,11,0.1);border-radius:8px;">
+                <div style="color:var(--text-secondary);font-size:0.9rem;">Last Login</div>
+                <div style="color:var(--accent-gold);font-weight:700;">
+                    {{ user.last_login.strftime('%b %d, %Y %H:%M') if user.last_login else 'First login' }}
+                </div>
+            </div>
+            <div style="padding:1rem;background:rgba(239,68,68,0.1);border-radius:8px;">
+                <div style="color:var(--text-secondary);font-size:0.9rem;">Account Status</div>
+                <div style="color:{% if user.is_active %}var(--accent-green){% else %}var(--accent-red){% endif %};font-weight:700;">
+                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top:1.5rem;">
+        <h2 style="color:var(--text-primary);margin-bottom:1.5rem;">Change Password</h2>
+        <form method="POST" action="{{ url_for('auth.change_password') }}">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" name="new_password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" name="confirm_password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Change Password</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

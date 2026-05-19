@@ -1,0 +1,5 @@
+﻿{% extends "base.html" %}{% block title %}Backtest{% endblock %}{% block page_title %}🕐 Backtest{% endblock %}
+{% block content %}<div style="max-width:760px"><div class="card mb-16"><div class="card-header mb-16"><div class="card-title">Configure</div></div><div class="card-body">
+<div class="grid-2"><div class="form-group"><label class="form-label">Pair</label><select class="form-control">{% for p in pairs %}<option>{{p}}</option>{% endfor %}</select></div>
+<div class="form-group"><label class="form-label">Period</label><select class="form-control"><option>3M</option><option selected>1Y</option><option>2Y</option></select></div></div>
+<button id="bt-run" onclick="runBacktest()" class="btn btn-gold btn-lg">▶ Run Backtest</button></div></div><div id="bt-results"></div></div>{% endblock %}

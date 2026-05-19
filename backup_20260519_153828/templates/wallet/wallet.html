@@ -1,0 +1,46 @@
+﻿{% extends "base.html" %}
+{% block title %}Wallet - Forex Bot Pro{% endblock %}
+{% block content %}
+<h1 style="color:var(--text-primary);margin-bottom:2rem;">
+    <i class="fas fa-wallet" style="color:var(--accent-gold);"></i> My Wallet
+</h1>
+
+<div class="card" style="text-align:center;padding:3rem;margin-bottom:2rem;">
+    <div style="color:var(--text-secondary);margin-bottom:1rem;">Available Balance</div>
+    <div style="font-size:3.5rem;font-weight:700;color:var(--accent-green);">${{ "%.2f"|format(balance) }}</div>
+    <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;">
+        <a href="{{ url_for('wallet.deposit') }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Deposit
+        </a>
+        <a href="{{ url_for('wallet.withdraw') }}" class="btn btn-danger">
+            <i class="fas fa-minus"></i> Withdraw
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="color:var(--text-primary);margin-bottom:1rem;">Transaction History</h2>
+    {% if transactions %}
+    {% for tx in transactions %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                {% if tx.transaction_type == 'DEPOSIT' %}background:rgba(16,185,129,0.2);{% else %}background:rgba(239,68,68,0.2);{% endif %}">
+                <i class="fas {% if tx.transaction_type == 'DEPOSIT' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"
+                    style="color:{% if tx.transaction_type == 'DEPOSIT' %}var(--accent-green){% else %}var(--accent-red){% endif %};"></i>
+            </div>
+            <div>
+                <div style="color:var(--text-primary);font-weight:600;">{{ tx.transaction_type }}</div>
+                <div style="color:var(--text-secondary);font-size:0.85rem;">{{ tx.created_at.strftime('%b %d, %Y %H:%M') }}</div>
+            </div>
+        </div>
+        <div style="font-size:1.25rem;font-weight:700;color:{% if tx.transaction_type == 'DEPOSIT' %}var(--accent-green){% else %}var(--accent-red){% endif %};">
+            {% if tx.transaction_type == 'DEPOSIT' %}+{% else %}-{% endif %}${{ "%.2f"|format(tx.amount) }}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color:var(--text-secondary);text-align:center;padding:2rem;">No transactions yet</p>
+    {% endif %}
+</div>
+{% endblock %}
