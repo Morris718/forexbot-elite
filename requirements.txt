@@ -11,3 +11,5 @@ numpy==1.26.4
 gevent==23.9.1
 gevent-websocket==0.10.1
 gunicorn==21.2.0
+
+eventlet>=0.24.1
