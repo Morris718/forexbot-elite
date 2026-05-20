@@ -1,4 +1,4 @@
-import os, sys, eventlet
+import os, sys
 # monkey_patch removed
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -117,4 +117,5 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", find_free_port()))
     print(f"\n  FOREXBOT ELITE on http://0.0.0.0:{port}\n")
     socketio.run(app, host="0.0.0.0", port=port, debug=False, use_reloader=False, log_output=False)
+
 
