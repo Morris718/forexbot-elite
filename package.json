@@ -1,0 +1,21 @@
+{
+  "name": "forex_trading_bot",
+  "version": "1.0.0",
+  "description": "AI-powered forex trading platform with real-time WebSocket price feeds,  live charts, position management, and AI signals.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Morris718/forexbot-elite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Morris718/forexbot-elite/issues"
+  },
+  "homepage": "https://github.com/Morris718/forexbot-elite#readme"
+}
