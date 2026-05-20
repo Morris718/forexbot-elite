@@ -1,5 +1,5 @@
-﻿import os, sys, eventlet
-eventlet.monkey_patch()
+import os, sys, eventlet
+# monkey_patch removed
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 if ROOT not in sys.path: sys.path.insert(0, ROOT)
@@ -8,7 +8,7 @@ from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from database import db, login_manager
 
-socketio = SocketIO(async_mode="eventlet", cors_allowed_origins="*",
+socketio = SocketIO(async_mode='gevent', cors_allowed_origins="*",
                     logger=False, engineio_logger=False, ping_timeout=20, ping_interval=10)
 
 def create_app():
@@ -117,3 +117,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", find_free_port()))
     print(f"\n  FOREXBOT ELITE on http://0.0.0.0:{port}\n")
     socketio.run(app, host="0.0.0.0", port=port, debug=False, use_reloader=False, log_output=False)
+
